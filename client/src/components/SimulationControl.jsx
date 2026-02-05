@@ -15,38 +15,38 @@ const SimulationControl = () => {
     };
 
     return (
-        <div className="glass-panel p-6 border-l-4 border-blue-500">
-            <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                <Activity className="text-blue-400" />
+        <div className="bg-white/80 backdrop-blur-xl p-8 border border-white/20 shadow-xl rounded-3xl">
+            <h3 className="text-xl font-bold mb-4 flex items-center gap-2 text-brand-navy">
+                <Activity className="text-brand-blue" />
                 Digital Twin Simulation
             </h3>
-            <p className="text-sm text-gray-400 mb-6">
+            <p className="text-sm text-slate-500 mb-6">
                 Control the backend physics engine to simulate "What-If" scenarios.
             </p>
 
             <div className="flex gap-4">
                 <button 
                     onClick={() => triggerScenario('normal')}
-                    className={`btn flex-1 flex items-center justify-center gap-2 ${activeScenario === 'normal' ? 'bg-emerald-600' : 'bg-gray-700'}`}
+                    className={`btn flex-1 py-3 rounded-xl flex items-center justify-center gap-2 transition-all font-bold ${activeScenario === 'normal' ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30' : 'bg-white border border-slate-200 text-slate-500 hover:bg-slate-50'}`}
                 >
-                    <Play size={16} /> Normal Ops
+                    <Play size={18} /> Normal
                 </button>
                 <button 
                     onClick={() => triggerScenario('leak')}
-                    className={`btn flex-1 flex items-center justify-center gap-2 ${activeScenario === 'leak' ? 'bg-red-600' : 'bg-gray-700'}`}
+                    className={`btn flex-1 py-3 rounded-xl flex items-center justify-center gap-2 transition-all font-bold ${activeScenario === 'leak' ? 'bg-red-500 text-white shadow-lg shadow-red-500/30' : 'bg-white border border-slate-200 text-slate-500 hover:bg-slate-50'}`}
                 >
-                    <AlertTriangle size={16} /> Burst Pipe
+                    <AlertTriangle size={18} /> Leak Event
                 </button>
                 <button 
                     onClick={() => triggerScenario('overload')}
-                    className={`btn flex-1 flex items-center justify-center gap-2 ${activeScenario === 'overload' ? 'bg-amber-600' : 'bg-gray-700'}`}
+                    className={`btn flex-1 py-3 rounded-xl flex items-center justify-center gap-2 transition-all font-bold ${activeScenario === 'overload' ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/30' : 'bg-white border border-slate-200 text-slate-500 hover:bg-slate-50'}`}
                 >
-                    <Activity size={16} /> Grid Overload
+                    <Activity size={18} /> Overload
                 </button>
             </div>
             
             <div className="mt-4 text-center">
-                 <span className="text-xs text-gray-500 uppercase tracking-widest">
+                 <span className="text-xs text-slate-400 uppercase tracking-widest font-semibold">
                     Status: {activeScenario === 'normal' ? 'Running Optimal Profile' : 'Injecting Fault Anomaly'}
                  </span>
             </div>

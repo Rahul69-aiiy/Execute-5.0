@@ -14,13 +14,18 @@ const ElectricityAnalytics = () => {
     ];
 
   return (
-    <div className="container animate-fade-in">
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent mb-2">Electricity Control</h2>
-          <p className="text-gray-400">Peak load management and efficiency tracking</p>
+    <div className="container animate-fade-in pb-10 pt-4 pr-6">
+        <div className="mb-8 flex justify-between items-end">
+          <div>
+            <h2 className="text-3xl font-bold text-brand-navy mb-2">Electricity Control</h2>
+            <p className="text-slate-500 font-medium">Peak load management and efficiency tracking</p>
+          </div>
+          <div className="px-4 py-2 rounded-xl bg-orange-50 text-orange-600 font-bold text-sm border border-orange-100 flex items-center gap-2">
+             <Zap size={16} /> Grid Active
+          </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <StatCard 
                 title="Current Load" 
                 value="850" 
@@ -47,30 +52,34 @@ const ElectricityAnalytics = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2">
-                 <h3 className="text-xl font-bold mb-4 text-white">Load Distribution Heatmap</h3>
-                 <HeatmapMap data={mockData} type="electricity" />
+            <div className="lg:col-span-2 bg-white/80 backdrop-blur-xl p-6 rounded-3xl border border-white/20 shadow-xl">
+                 <h3 className="text-xl font-bold mb-6 text-brand-navy">Load Distribution Heatmap</h3>
+                 <div className="rounded-2xl overflow-hidden border border-slate-200 shadow-inner">
+                    <HeatmapMap data={mockData} type="electricity" />
+                 </div>
             </div>
-            <div className="glass-panel p-6">
-                <h3 className="text-xl font-bold mb-4 text-white">High Consumption Units</h3>
+            <div className="bg-white/80 backdrop-blur-xl p-6 border border-white/20 shadow-xl rounded-3xl h-fit">
+                <h3 className="text-xl font-bold mb-6 text-brand-navy">High Consumption Units</h3>
                 <div className="space-y-4">
                     {mockData.sort((a,b) => b.value - a.value).map((zone, idx) => (
-                        <div key={zone.id} className="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
-                            <div className="flex items-center gap-3">
-                                <span className="text-gray-500 font-mono">0{idx+1}</span>
-                                <div>
-                                    <h4 className="font-medium text-gray-200">{zone.zone}</h4>
-                                    <div className="w-24 h-1.5 bg-gray-700 rounded-full mt-1 overflow-hidden">
+                        <div key={zone.id} className="flex items-center justify-between p-4 rounded-xl bg-white/50 hover:bg-white transition-all border border-slate-100 shadow-sm hover:shadow-md hover:-translate-x-1 duration-300">
+                            <div className="flex items-center gap-4 flex-1">
+                                <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${idx < 3 ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-500'}`}>
+                                    0{idx+1}
+                                </span>
+                                <div className="w-full mr-4">
+                                    <h4 className="font-bold text-brand-navy">{zone.zone}</h4>
+                                    <div className="w-full h-2 bg-slate-100 rounded-full mt-2 overflow-hidden shadow-inner">
                                         <div 
-                                            className={`h-full rounded-full ${zone.value > 80 ? 'bg-red-500' : 'bg-emerald-500'}`} 
+                                            className={`h-full rounded-full ${zone.value > 80 ? 'bg-gradient-to-r from-red-500 to-rose-500' : 'bg-gradient-to-r from-emerald-400 to-emerald-500'}`} 
                                             style={{ width: `${zone.value}%` }}
                                         ></div>
                                     </div>
                                 </div>
                             </div>
-                            <div className="text-right">
-                                <div className="text-sm font-bold text-white">{zone.value} kW</div>
-                                <span className="text-xs text-gray-500">Usage</span>
+                            <div className="text-right min-w-[60px]">
+                                <div className="text-lg font-bold text-brand-navy">{zone.value}</div>
+                                <span className="text-[10px] uppercase font-bold text-slate-400">kW Load</span>
                             </div>
                         </div>
                     ))}

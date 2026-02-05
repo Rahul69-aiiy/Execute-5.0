@@ -13,10 +13,10 @@ const HeatmapMap = ({ data, type = 'water' }) => {
   const center = [28.6139, 77.2090]; // Default New Delhi (Example)
 
   return (
-    <div className="h-[500px] w-full rounded-2xl overflow-hidden glass-panel border border-white/10 relative z-0">
+    <div className="h-[500px] w-full rounded-2xl overflow-hidden glass-panel border border-slate-200 relative z-0 shadow-md">
       <MapContainer center={center} zoom={13} style={{ height: '100%', width: '100%' }}>
             <TileLayer
-                url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
             />
             {data.map((point) => (
@@ -44,20 +44,20 @@ const HeatmapMap = ({ data, type = 'water' }) => {
       </MapContainer>
       
       {/* Legend */}
-      <div className="absolute bottom-4 right-4 bg-gray-900/80 backdrop-blur-md p-4 rounded-xl border border-white/10 z-[1000]">
-        <h4 className="text-white text-xs font-bold mb-2 uppercase tracking-wider">Intensity Level</h4>
+      <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-md p-4 rounded-xl border border-slate-200 shadow-lg z-[1000]">
+        <h4 className="text-brand-navy text-xs font-bold mb-2 uppercase tracking-wider">Intensity Level</h4>
         <div className="space-y-2">
             <div className="flex items-center gap-2">
                 <span className="w-3 h-3 rounded-full bg-red-500"></span>
-                <span className="text-xs text-gray-300">High (&gt;80) - Critical</span>
+                <span className="text-xs text-slate-600">High (&gt;80) - Critical</span>
             </div>
             <div className="flex items-center gap-2">
                 <span className="w-3 h-3 rounded-full bg-amber-500"></span>
-                <span className="text-xs text-gray-300">Medium (50-80) - Warning</span>
+                <span className="text-xs text-slate-600">Medium (50-80) - Warning</span>
             </div>
             <div className="flex items-center gap-2">
                 <span className="w-3 h-3 rounded-full bg-emerald-500"></span>
-                <span className="text-xs text-gray-300">Low (&lt;50) - Optimal</span>
+                <span className="text-xs text-slate-600">Low (&lt;50) - Optimal</span>
             </div>
         </div>
       </div>

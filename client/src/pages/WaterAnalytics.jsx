@@ -14,13 +14,18 @@ const WaterAnalytics = () => {
     ];
 
   return (
-    <div className="container animate-fade-in">
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent mb-2">Water Intelligence</h2>
-          <p className="text-gray-400">Spatial analysis and leakage detection system</p>
+    <div className="container animate-fade-in pb-10 pt-4 pr-6">
+        <div className="mb-8 flex justify-between items-end">
+          <div>
+            <h2 className="text-3xl font-bold text-brand-navy mb-2">Water Intelligence</h2>
+            <p className="text-slate-500 font-medium">Spatial analysis and leakage detection system</p>
+          </div>
+          <div className="px-4 py-2 rounded-xl bg-blue-50 text-brand-blue font-bold text-sm border border-blue-100">
+             Live Sensor Data
+          </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <StatCard 
                 title="Current Flow Rate" 
                 value="4,230" 
@@ -46,25 +51,29 @@ const WaterAnalytics = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2">
-                 <h3 className="text-xl font-bold mb-4 text-white">Live Usage Heatmap</h3>
-                 <HeatmapMap data={mockData} type="water" />
+            <div className="lg:col-span-2 bg-white/80 backdrop-blur-xl p-6 rounded-3xl border border-white/20 shadow-xl">
+                 <h3 className="text-xl font-bold mb-6 text-brand-navy">Live Usage Heatmap</h3>
+                 <div className="rounded-2xl overflow-hidden border border-slate-200 shadow-inner">
+                    <HeatmapMap data={mockData} type="water" />
+                 </div>
             </div>
-            <div className="glass-panel p-6">
-                <h3 className="text-xl font-bold mb-4 text-white">Zone Analysis</h3>
+            <div className="bg-white/80 backdrop-blur-xl p-6 border border-white/20 shadow-xl rounded-3xl h-fit">
+                <h3 className="text-xl font-bold mb-6 text-brand-navy">Zone Analysis</h3>
                 <div className="space-y-4">
                     {mockData.sort((a,b) => b.value - a.value).map((zone, idx) => (
-                        <div key={zone.id} className="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
-                            <div className="flex items-center gap-3">
-                                <span className="text-gray-500 font-mono">0{idx+1}</span>
+                        <div key={zone.id} className="flex items-center justify-between p-4 rounded-xl bg-white/50 hover:bg-white transition-all border border-slate-100 shadow-sm hover:shadow-md hover:-translate-x-1 duration-300">
+                            <div className="flex items-center gap-4">
+                                <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${idx < 3 ? 'bg-brand-navy text-white' : 'bg-slate-100 text-slate-500'}`}>
+                                    {idx+1}
+                                </span>
                                 <div>
-                                    <h4 className="font-medium text-gray-200">{zone.zone}</h4>
-                                    <span className="text-xs text-gray-500">Lat: {zone.lat.toFixed(2)}</span>
+                                    <h4 className="font-bold text-brand-navy">{zone.zone}</h4>
+                                    <span className="text-xs text-slate-400 font-mono">Lat: {zone.lat.toFixed(2)}</span>
                                 </div>
                             </div>
-                            <div className={`px-2 py-1 rounded text-xs font-bold ${
-                                zone.value > 80 ? 'bg-red-500/20 text-red-400' : 
-                                zone.value > 50 ? 'bg-amber-500/20 text-amber-400' : 'bg-emerald-500/20 text-emerald-400'
+                            <div className={`px-3 py-1.5 rounded-lg text-xs font-bold border ${
+                                zone.value > 80 ? 'bg-red-50 border-red-100 text-red-600' : 
+                                zone.value > 50 ? 'bg-amber-50 border-amber-100 text-amber-600' : 'bg-emerald-50 border-emerald-100 text-emerald-600'
                             }`}>
                                 {zone.value} L
                             </div>
