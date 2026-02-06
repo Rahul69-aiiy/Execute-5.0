@@ -1,11 +1,46 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import ForecastingChart from '../components/ForecastingChart';
 import { Zap, BatteryCharging, Fan, Sun, AlertTriangle } from 'lucide-react';
+import axios from 'axios';
 
 const ElectricityAnalytics = () => {
-  const labels = ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '23:59'];
-  const historicalLoad = [120, 100, 250, 480, 500, 350, 200];
-  const forecastLoad = [120, 100, 250, 480, 450, 320, 180];
+  const [electricityData, setElectricityData] = useState({
+    hourlyData: {
+      labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '23:59'],
+      actual: [120, 100, 250, 480, 500, 350, 200],
+      forecast: [120, 100, 250, 480, 450, 320, 180]
+    },
+    hvac: null,
+    loadShifting: [],
+    renewable: null,
+    anomaly: null
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchElectricityData();
+  }, []);
+
+  const fetchElectricityData = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/api/dashboard/electricity-analytics');
+
+      if (response.data.success) {
+        const { hourlyData, hvac, loadShifting, renewable, anomaly } = response.data.data;
+        setElectricityData({
+          hourlyData: hourlyData || electricityData.hourlyData,
+          hvac,
+          loadShifting,
+          renewable,
+          anomaly
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching electricity analytics:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="flex flex-col gap-6 pb-10">
@@ -32,13 +67,22 @@ const ElectricityAnalytics = () => {
           <h3 className="text-lg font-bold text-slate-800 mb-2">Smart HVAC Control</h3>
           <p className="text-sm text-slate-500 mb-4">Occupancy-based setpoint adjustments.</p>
           <div className="flex items-center gap-2 mb-2">
-            <span className="text-2xl font-mono text-green-600 font-bold">24°C</span>
-            <span className="text-xs text-green-700 bg-green-100 px-2 py-1 rounded font-bold">Optimized</span>
+            <span className="text-2xl font-mono text-green-600 font-bold">
+              {electricityData.hvac?.temperature || 24}°C
+            </span>
+            <span className="text-xs text-green-700 bg-green-100 px-2 py-1 rounded font-bold">
+              {electricityData.hvac?.status || 'Optimized'}
+            </span>
           </div>
           <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-            <div className="h-full bg-green-500 w-2/3"></div>
+            <div
+              className="h-full bg-green-500"
+              style={{ width: `${electricityData.hvac?.progress || 67}%` }}
+            ></div>
           </div>
-          <p className="text-xs text-slate-400 mt-2">Saving 15% energy vs fixed 18°C</p>
+          <p className="text-xs text-slate-400 mt-2">
+            Saving {electricityData.hvac?.savingsPercent || 15}% energy vs fixed 18°C
+          </p>
         </div>
 
         {/* Strategy 2: Load Shifting */}
@@ -49,14 +93,25 @@ const ElectricityAnalytics = () => {
           <h3 className="text-lg font-bold text-slate-800 mb-2">Load Shifting</h3>
           <p className="text-sm text-slate-500 mb-4">Peak to Off-Peak scheduling.</p>
           <div className="flex flex-col gap-2">
-             <div className="flex justify-between items-center text-sm p-2 rounded bg-slate-50">
-                <span className="text-slate-600">Heavy Machinery</span>
-                <span className="text-purple-600 font-bold">22:00 PM</span>
-             </div>
-             <div className="flex justify-between items-center text-sm p-2 rounded bg-slate-50">
-                <span className="text-slate-600">Water Pumps</span>
-                <span className="text-purple-600 font-bold">03:00 AM</span>
-             </div>
+             {electricityData.loadShifting.length > 0 ? (
+               electricityData.loadShifting.map((item, idx) => (
+                 <div key={idx} className="flex justify-between items-center text-sm p-2 rounded bg-slate-50">
+                    <span className="text-slate-600">{item.equipment}</span>
+                    <span className="text-purple-600 font-bold">{item.scheduledTime}</span>
+                 </div>
+               ))
+             ) : (
+               <>
+                 <div className="flex justify-between items-center text-sm p-2 rounded bg-slate-50">
+                    <span className="text-slate-600">Heavy Machinery</span>
+                    <span className="text-purple-600 font-bold">22:00 PM</span>
+                 </div>
+                 <div className="flex justify-between items-center text-sm p-2 rounded bg-slate-50">
+                    <span className="text-slate-600">Water Pumps</span>
+                    <span className="text-purple-600 font-bold">03:00 AM</span>
+                 </div>
+               </>
+             )}
           </div>
         </div>
 
@@ -68,20 +123,26 @@ const ElectricityAnalytics = () => {
           <h3 className="text-lg font-bold text-slate-800 mb-2">Renewable Integration</h3>
           <p className="text-sm text-slate-500 mb-4">Solar usage prediction.</p>
           <div className="flex items-end gap-2 text-amber-500 mb-2">
-            <span className="text-3xl font-bold">45%</span>
-            <span className="text-sm pb-1 font-medium text-amber-600">of load on Solar</span>
+            <span className="text-3xl font-bold">
+              {electricityData.renewable?.solarPercentage || 45}%
+            </span>
+            <span className="text-sm pb-1 font-medium text-amber-600">
+              {electricityData.renewable?.description || 'of load on Solar'}
+            </span>
           </div>
-           <p className="text-xs text-slate-400">Reducing grid dependency 12PM - 4PM</p>
+           <p className="text-xs text-slate-400">
+             {electricityData.renewable?.detail || 'Reducing grid dependency 12PM - 4PM'}
+           </p>
         </div>
       </div>
 
       {/* Main Chart */}
       <div className="h-[400px] border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
-        <ForecastingChart 
-          title="Electricity Demand Forecast" 
-          labels={labels}
-          historicalData={historicalLoad}
-          forecastData={forecastLoad}
+        <ForecastingChart
+          title="Electricity Demand Forecast"
+          labels={electricityData.hourlyData.labels}
+          historicalData={electricityData.hourlyData.actual}
+          forecastData={electricityData.hourlyData.forecast}
           yAxisLabel="Power (kW)"
           color="#f97316" // Orange
         />
@@ -94,8 +155,12 @@ const ElectricityAnalytics = () => {
                 <AlertTriangle />
              </div>
              <div>
-                <h4 className="font-bold text-slate-800">Anomaly Detected: Hostel Block B</h4>
-                <p className="text-sm text-slate-500">Sudden spike of 200kW detected at 14:30. Possible HVAC malfunction.</p>
+                <h4 className="font-bold text-slate-800">
+                  Anomaly Detected: {electricityData.anomaly?.location || 'Hostel Block B'}
+                </h4>
+                <p className="text-sm text-slate-500">
+                  {electricityData.anomaly?.description || 'Sudden spike of 200kW detected at 14:30. Possible HVAC malfunction.'}
+                </p>
              </div>
           </div>
           <button className="px-4 py-2 rounded-lg bg-rose-50 text-rose-600 font-bold hover:bg-rose-100 transition-colors">

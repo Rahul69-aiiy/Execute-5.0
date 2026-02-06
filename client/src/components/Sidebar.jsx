@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, Link } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Zap, 
@@ -24,7 +24,7 @@ const Sidebar = ({ isOpen, toggle }) => {
   return (
     <div className={`h-full flex flex-col py-6 transition-all duration-300 bg-white/50 backdrop-blur-xl border-r border-white/40 ${isOpen ? 'px-4' : 'px-2'}`}>
       {/* Brand */}
-      <div className={`flex items-center gap-3 mb-10 ${isOpen ? 'px-2' : 'justify-center'}`}>
+      <Link to="/" className={`flex items-center gap-3 mb-10 cursor-pointer hover:opacity-80 transition-opacity ${isOpen ? 'px-2' : 'justify-center'}`}>
         <div className="w-10 h-10 rounded-lg bg-green-600 flex items-center justify-center shrink-0 shadow-lg shadow-green-600/20">
           <Leaf className="text-white w-6 h-6" />
         </div>
@@ -34,7 +34,7 @@ const Sidebar = ({ isOpen, toggle }) => {
             <span className="text-[10px] text-green-600 font-bold uppercase tracking-widest">Powering Environment</span>
           </div>
         )}
-      </div>
+      </Link>
 
       {/* Navigation */}
       <nav className="flex-1 flex flex-col gap-1">

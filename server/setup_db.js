@@ -6,10 +6,11 @@ const setupDatabase = async () => {
     
     // Connect to 'postgres' default database to create the new one
     const client = new Client({
-        user: process.env.DB_USER,
-        host: process.env.DB_HOST,
-        password: process.env.DB_PASS,
-        database: 'postgres', // Connect to default DB first
+        user: process.env.DB_USER || "postgres",
+        host: process.env.DB_HOST || "localhost",
+        password: process.env.DB_PASSWORD || "your_password",
+        database: process.env.DB_NAME || "piyushdb", // Connect to default DB first
+        port: process.env.DB_PORT || 5432,
     });
 
     try {
