@@ -1,32 +1,36 @@
 import React from 'react';
 import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
 
-const StatCard = ({ title, value, unit, change, trend = 'neutral', icon: Icon, color }) => {
+const StatCard = ({ title, value, unit, change, trend, icon: Icon, color }) => {
+  const isPositive = trend === 'up';
+  
   return (
-    <div className="bg-white/80 backdrop-blur-xl p-6 relative overflow-hidden group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-white/20 rounded-2xl">
-      <div className={`absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity ${color}`}>
-        <Icon size={64} />
-      </div>
+    <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden group hover:shadow-lg transition-all duration-300">
       
       <div className="flex justify-between items-start mb-4">
         <div className={`p-3 rounded-xl bg-gradient-to-br ${color} text-white shadow-md`}>
           <Icon size={24} />
         </div>
         {change && (
-          <div className={`flex items-center gap-1 text-sm font-medium ${trend === 'up' ? 'text-red-500' : 'text-emerald-500'}`}>
-            {trend === 'up' ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
-            <span>{change}%</span>
+          <div className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-full ${isPositive ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+            {isPositive ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
+            {change}%
           </div>
         )}
       </div>
       
       <div>
         <h3 className="text-slate-500 text-sm font-medium mb-1">{title}</h3>
-        <div className="flex items-baseline gap-2">
-          <span className="text-3xl font-bold text-brand-navy">{value}</span>
-          <span className="text-slate-400 text-sm">{unit}</span>
+        <div className="flex items-baseline gap-1">
+          <span className="text-3xl font-bold text-slate-800 tracking-tight">{value}</span>
+          {unit && <span className="text-sm text-slate-400 font-medium">{unit}</span>}
         </div>
       </div>
+
+       <div className={`absolute -bottom-6 -right-6 p-4 opacity-5 group-hover:opacity-10 transition-opacity bg-gradient-to-br ${color} bg-clip-text text-transparent transform rotate-12`}>
+        <Icon size={100} />
+      </div>
+
     </div>
   );
 };
