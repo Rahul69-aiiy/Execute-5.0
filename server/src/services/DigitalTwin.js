@@ -1,7 +1,7 @@
 class DigitalTwinService {
     constructor() {
         this.zones = ['Zone A', 'Zone B', 'Zone C', 'Zone D', 'Zone E'];
-        // Initial State
+        // Initial State (fallback)
         this.state = this.zones.map(zone => ({
             id: zone,
             waterLevel: 50, // 0-100
@@ -11,61 +11,73 @@ class DigitalTwinService {
         }));
         
         this.scenario = 'normal'; // normal, leak, overload
+        this.pythonApiUrl = 'http://localhost:8000';
+        
+        // Import axios dynamically if needed or assume it's available global/require
+        try {
+            this.axios = require('axios');
+        } catch (e) {
+            console.error("Axios not found, simulation will fail silently");
+        }
     }
 
-    // Simulate extensive "Physics" (Simplified)
-    tick() {
-        const timeFactor = this._getTimeFactor();
-        
-        this.state = this.state.map(zone => {
-            let waterChange = (Math.random() * 4 - 2); // Natural fluctuation
+    // Call Python RL Agent
+    async tick() {
+        try {
+            // We'll just update one global state for now as the Python model is simple
+            // In a full version, we'd send per-zone data
+            const response = await this.axios.post(`${this.pythonApiUrl}/step`, {
+                action: null // Let agent decide
+            });
+
+            const { state, action_taken, reward } = response.data;
+
+            // Update all zones with some noise to make them look distinct
+            this.state = this.state.map(zone => {
+                // Add some random variation per zone so they aren't identical
+                const noise = () => Math.random() * 5 - 2.5;
+                
+                return {
+                    ...zone,
+                    waterLevel: Math.max(0, Math.min(100, state.water_level + noise())),
+                    electricityLoad: Math.max(0, Math.min(100, state.electricity_load + noise())),
+                    lastUpdated: new Date(),
+                    // Store RL info for frontend if needed
+                    rl_action: action_taken,
+                    rl_reward: reward
+                };
+            });
+
+        } catch (error) {
+            console.error("Failed to fetch from ML Service:", error.message);
+            // Fallback to simple logic if Python is down
+            this._fallbackTick();
+        }
+
+        return this.state;
+    }
+
+    _fallbackTick() {
+         this.state = this.state.map(zone => {
+            let waterChange = (Math.random() * 4 - 2); 
             let elecChange = (Math.random() * 4 - 2); 
-
-            // Scenario Logic
-            if (this.scenario === 'leak' && zone.id === 'Zone D') {
-                waterChange += 15; // Massive leak
-            }
-            if (this.scenario === 'overload' && zone.id === 'Zone B') {
-                elecChange += 20; // Grid strain
-            }
-
-            // Time Logic (High usage in morning/evening)
-            if (timeFactor > 1.2) {
-                waterChange += 2;
-                elecChange += 3;
-            }
-
-            // Update Values with Clamping
-            let newWater = Math.max(0, Math.min(100, zone.waterLevel + waterChange));
-            let newElec = Math.max(0, Math.min(100, zone.electricityLoad + elecChange));
-
             return {
                 ...zone,
-                waterLevel: parseFloat(newWater.toFixed(2)),
-                electricityLoad: parseFloat(newElec.toFixed(2)),
+                waterLevel: Math.max(0, Math.min(100, zone.waterLevel + waterChange)),
+                electricityLoad: Math.max(0, Math.min(100, zone.electricityLoad + elecChange)),
                 lastUpdated: new Date()
             };
         });
-
-        return this.state;
     }
 
     setScenario(type) {
         this.scenario = type;
         console.log(`[Digital Twin] Scenario set to: ${type}`);
+        // Ideally tell Python API about this too
     }
 
     getSnapshot() {
         return this.state;
-    }
-
-    _getTimeFactor() {
-        const hour = new Date().getHours();
-        // Peak hours: 8-10 AM, 6-9 PM
-        if ((hour >= 8 && hour <= 10) || (hour >= 18 && hour <= 21)) {
-            return 1.5;
-        }
-        return 1.0;
     }
 }
 

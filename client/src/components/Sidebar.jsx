@@ -8,7 +8,8 @@ import {
   ChevronLeft, 
   Menu,
   Globe2,
-  Leaf
+  Leaf,
+  Home
 } from 'lucide-react';
 
 const Sidebar = ({ isOpen, toggle }) => {
@@ -69,7 +70,15 @@ const Sidebar = ({ isOpen, toggle }) => {
       </nav>
       
       {/* Bottom Actions */}
-      <div className="mt-auto">
+      <div className="mt-auto flex flex-col gap-2">
+        <NavLink
+          to="/"
+          className={`flex items-center gap-3 p-3 rounded-lg text-slate-400 hover:text-slate-800 hover:bg-slate-50 transition-all ${!isOpen && 'justify-center'}`}
+        >
+          <Home className="w-5 h-5" />
+          {isOpen && <span className="font-medium text-sm">Return to Home</span>}
+        </NavLink>
+
         <button 
           onClick={toggle}
           className={`w-full flex items-center gap-3 p-3 rounded-lg text-slate-400 hover:text-slate-800 hover:bg-slate-50 transition-all ${!isOpen && 'justify-center'}`}
