@@ -7,7 +7,7 @@ let sequelize;
 let isDbConnected = false;
 
 try {
-  sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER, process.env.DB_PASS, {
+  sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER, process.env.DB_PASSWORD, {
     host: process.env.DB_HOST,
     dialect: 'postgres',
     logging: false,
@@ -23,6 +23,7 @@ const connectDB = async () => {
     console.log('PostgreSQL Connected via Sequelize');
     isDbConnected = true;
   } catch (error) {
+    console.log()
     console.error('Database Connection Error (Running in Mock Mode):', error.message);
     isDbConnected = false;
   }

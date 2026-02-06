@@ -33,9 +33,9 @@ const LandingPage = () => {
           </Link>
 
           <div className="hidden md:flex items-center gap-8 font-medium text-slate-600 text-sm">
-             <a href="#features" className="hover:text-green-600 transition-colors">Platform</a>
-             <a href="#technology" className="hover:text-green-600 transition-colors">Technology</a>
-             <a href="#impact" className="hover:text-green-600 transition-colors">Impact</a>
+             <Link to="/about#features" className="hover:text-green-600 transition-colors">Platform</Link>
+             <Link to="/about#technology" className="hover:text-green-600 transition-colors">Technology</Link>
+             <Link to="/about#impact" className="hover:text-green-600 transition-colors">Impact</Link>
           </div>
 
           <Link to="/dashboard" className="px-6 py-2.5 rounded-full bg-green-600 text-white font-semibold hover:bg-green-700 transition-all shadow-lg shadow-green-600/20 flex items-center gap-2 transform hover:-translate-y-0.5">
@@ -73,9 +73,9 @@ const LandingPage = () => {
                   <Link to="/dashboard" className="px-8 py-4 rounded-xl bg-slate-900 text-white font-bold text-lg hover:bg-slate-800 hover:shadow-xl transition-all flex items-center justify-center gap-3">
                      View Live Dashboard <Activity size={20} />
                   </Link>
-                  <button className="px-8 py-4 rounded-xl bg-white text-slate-700 border border-slate-200 font-bold text-lg hover:bg-slate-50 transition-all flex items-center justify-center gap-3 shadow-sm hover:shadow-md">
+                  <Link to="/about" className="px-8 py-4 rounded-xl bg-white text-slate-700 border border-slate-200 font-bold text-lg hover:bg-slate-50 transition-all flex items-center justify-center gap-3 shadow-sm hover:shadow-md">
                      Learn More <ArrowRight size={20} />
-                  </button>
+                  </Link>
                </div>
             </motion.div>
           </div>
@@ -131,7 +131,7 @@ const LandingPage = () => {
                <span className="font-bold text-slate-700">GreenGrid AI</span>
             </div>
             <p className="text-slate-400 text-sm">
-               &copy; 2026 GreenGrid AI. Sustainability Hackathon Project.
+               &copy; 2026 GreenGrid AI. All rights reserved.
             </p>
          </div>
       </footer>

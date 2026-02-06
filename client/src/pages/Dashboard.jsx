@@ -1,13 +1,53 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Droplets, Zap, Activity, Leaf, AlertTriangle, TrendingUp, Sun, ArrowRight } from 'lucide-react';
 import StatCard from '../components/StatCard';
 import ForecastingChart from '../components/ForecastingChart';
+import axios from 'axios';
 
 const Dashboard = () => {
-  // Mock Data
-  const labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  const energyData = [450, 520, 480, 550, 600, 580, 620];
-  const energyForecast = [460, 530, 490, 540, 590, 570, 610];
+  const [dashboardStats, setDashboardStats] = useState({
+    electricity: 542,
+    water: 1240,
+    sustainabilityScore: 87,
+    alerts: 2
+  });
+  const [energyChartData, setEnergyChartData] = useState({
+    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+    actual: [450, 520, 480, 550, 600, 580, 620],
+    forecast: [460, 530, 490, 540, 590, 570, 610]
+  });
+  const [alerts, setAlerts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      const [statsRes, energyRes, alertsRes] = await Promise.all([
+        axios.get('http://localhost:5000/api/dashboard/stats'),
+        axios.get('http://localhost:5000/api/dashboard/weekly-energy'),
+        axios.get('http://localhost:5000/api/dashboard/alerts')
+      ]);
+
+      if (statsRes.data) {
+        setDashboardStats(statsRes.data);
+      }
+
+      if (energyRes.data.success) {
+        setEnergyChartData(energyRes.data.data);
+      }
+
+      if (alertsRes.data.success) {
+        setAlerts(alertsRes.data.data);
+      }
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="flex flex-col gap-8 pb-10">
@@ -32,38 +72,38 @@ const Dashboard = () => {
 
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard 
-          title="Avg Energy Usage" 
-          value="542" 
-          unit="kWh" 
-          change="12" 
+        <StatCard
+          title="Avg Energy Usage"
+          value={dashboardStats.electricity}
+          unit="kWh"
+          change="12"
           trend="down"
-          icon={Zap} 
+          icon={Zap}
           color="from-orange-400 to-amber-500"
         />
-        <StatCard 
-          title="Water Flow Rate" 
-          value="1,240" 
-          unit="L/hr" 
-          change="5" 
+        <StatCard
+          title="Water Flow Rate"
+          value={dashboardStats.water}
+          unit="L/hr"
+          change="5"
           trend="up"
-          icon={Droplets} 
+          icon={Droplets}
           color="from-cyan-400 to-blue-500"
         />
-        <StatCard 
-          title="Sustainability Score" 
-          value="87" 
-          unit="/100" 
-          change="3" 
-          trend="up" 
-          icon={Leaf} 
+        <StatCard
+          title="Sustainability Score"
+          value={dashboardStats.sustainabilityScore}
+          unit="/100"
+          change="3"
+          trend="up"
+          icon={Leaf}
           color="from-green-400 to-emerald-600"
         />
-        <StatCard 
-          title="Pending Alerts" 
-          value="2" 
-          unit="Critical" 
-          icon={AlertTriangle} 
+        <StatCard
+          title="Pending Alerts"
+          value={dashboardStats.alerts}
+          unit="Critical"
+          icon={AlertTriangle}
           color="from-rose-400 to-red-600"
         />
       </div>
@@ -73,11 +113,11 @@ const Dashboard = () => {
          
          {/* Main Chart */}
          <div className="lg:col-span-2 h-full bg-white rounded-2xl border border-slate-100 shadow-sm p-2">
-            <ForecastingChart 
-               title="Campus Energy Energy Demand"
-               labels={labels}
-               historicalData={energyData}
-               forecastData={energyForecast}
+            <ForecastingChart
+               title="Campus Energy Demand"
+               labels={energyChartData.labels}
+               historicalData={energyChartData.actual}
+               forecastData={energyChartData.forecast}
                yAxisLabel="Load (kWh)"
                color="#16a34a"
             />
@@ -91,42 +131,72 @@ const Dashboard = () => {
             </div>
 
             <div className="flex-1 space-y-4 overflow-y-auto pr-2 custom-scrollbar">
-               {/* Alert Item */}
-               <div className="p-4 rounded-xl bg-rose-50 border border-rose-100 flex gap-4 items-start">
-                  <div className="mt-1 p-1 bg-rose-500 rounded-full animate-pulse"></div>
-                  <div>
-                     <h4 className="font-bold text-sm text-slate-800">Anomaly Detected</h4>
-                     <p className="text-xs text-slate-500 mt-1">Unusual spike in HVAC consumption in Block B.</p>
-                     <p className="text-[10px] text-rose-500 mt-2 font-mono font-bold">14 MINS AGO</p>
-                  </div>
-               </div>
-
-                {/* Insight Item */}
-               <div className="p-4 rounded-xl bg-amber-50 border border-amber-100 flex gap-4 items-start">
-                  <div className="mt-1">
-                     <Sun className="w-4 h-4 text-amber-500" />
-                  </div>
-                  <div>
-                     <h4 className="font-bold text-sm text-slate-800">Solar Optimization</h4>
-                     <p className="text-xs text-slate-500 mt-1">High generation period. Suggest shifting pump operations.</p>
-                     <button className="mt-2 text-[10px] px-3 py-1 bg-amber-100 text-amber-700 rounded-full font-bold hover:bg-amber-200 transition-colors">
-                        Auto-Apply
-                     </button>
-                  </div>
-               </div>
-
-               {/* Standard Log */}
-               <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 flex gap-4 items-start">
-                   <div className="mt-1 text-green-600">
-                     <Leaf size={16} />
+               {loading ? (
+                 <div className="text-center text-slate-400">Loading alerts...</div>
+               ) : alerts.length > 0 ? (
+                 alerts.map((alert) => (
+                   <div
+                     key={alert.id}
+                     className={`p-4 rounded-xl bg-${alert.color}-50 border border-${alert.color}-100 flex gap-4 items-start`}
+                   >
+                     <div className={`mt-1 ${alert.icon === 'alert' ? 'p-1 bg-rose-500 rounded-full animate-pulse' : ''}`}>
+                       {alert.icon === 'sun' && <Sun className="w-4 h-4 text-amber-500" />}
+                       {alert.icon === 'leaf' && <Leaf size={16} className="text-green-600" />}
+                     </div>
+                     <div>
+                       <h4 className="font-bold text-sm text-slate-800">{alert.title}</h4>
+                       <p className="text-xs text-slate-500 mt-1">{alert.message}</p>
+                       {alert.actionable && (
+                         <button className={`mt-2 text-[10px] px-3 py-1 bg-${alert.color}-100 text-${alert.color}-700 rounded-full font-bold hover:bg-${alert.color}-200 transition-colors`}>
+                           Auto-Apply
+                         </button>
+                       )}
+                       <p className={`text-[10px] text-${alert.color}-500 mt-2 font-mono font-bold`}>
+                         {alert.timeAgo}
+                       </p>
+                     </div>
                    </div>
-                  <div>
-                     <h4 className="font-bold text-sm text-slate-800">Daily Report Ready</h4>
-                     <p className="text-xs text-slate-500 mt-1">Yesterday's carbon footprint report is available.</p>
-                  </div>
-               </div>
+                 ))
+               ) : (
+                 <>
+                   {/* Alert Item */}
+                   <div className="p-4 rounded-xl bg-rose-50 border border-rose-100 flex gap-4 items-start">
+                      <div className="mt-1 p-1 bg-rose-500 rounded-full animate-pulse"></div>
+                      <div>
+                         <h4 className="font-bold text-sm text-slate-800">Anomaly Detected</h4>
+                         <p className="text-xs text-slate-500 mt-1">Unusual spike in HVAC consumption in Block B.</p>
+                         <p className="text-[10px] text-rose-500 mt-2 font-mono font-bold">14 MINS AGO</p>
+                      </div>
+                   </div>
+
+                    {/* Insight Item */}
+                   <div className="p-4 rounded-xl bg-amber-50 border border-amber-100 flex gap-4 items-start">
+                      <div className="mt-1">
+                         <Sun className="w-4 h-4 text-amber-500" />
+                      </div>
+                      <div>
+                         <h4 className="font-bold text-sm text-slate-800">Solar Optimization</h4>
+                         <p className="text-xs text-slate-500 mt-1">High generation period. Suggest shifting pump operations.</p>
+                         <button className="mt-2 text-[10px] px-3 py-1 bg-amber-100 text-amber-700 rounded-full font-bold hover:bg-amber-200 transition-colors">
+                            Auto-Apply
+                         </button>
+                      </div>
+                   </div>
+
+                   {/* Standard Log */}
+                   <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 flex gap-4 items-start">
+                       <div className="mt-1 text-green-600">
+                         <Leaf size={16} />
+                       </div>
+                      <div>
+                         <h4 className="font-bold text-sm text-slate-800">Daily Report Ready</h4>
+                         <p className="text-xs text-slate-500 mt-1">Yesterday's carbon footprint report is available.</p>
+                      </div>
+                   </div>
+                 </>
+               )}
             </div>
-            
+
             <button className="w-full py-2.5 rounded-xl border border-slate-200 text-slate-600 font-bold text-sm hover:bg-slate-50 transition-colors flex items-center justify-center gap-2">
                 View All Alerts <ArrowRight size={16} />
             </button>
