@@ -8,8 +8,33 @@ const DigitalTwin = () => {
   const [temperature, setTemperature] = useState(24);
   const [occupancy, setOccupancy] = useState(75);
 
+  const [results, setResults] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const runSimulation = async () => {
+    setLoading(true);
+    try {
+        const response = await fetch('http://localhost:5000/api/digital-twin/simulate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ temperature, occupancy })
+        });
+        const data = await response.json();
+        setResults(data);
+        if (!simulationActive) setSimulationActive(true);
+    } catch (error) {
+        console.error("Simulation failed:", error);
+    } finally {
+        setLoading(false);
+    }
+  };
+
   const toggleSimulation = () => {
-    setSimulationActive(!simulationActive);
+    if (!simulationActive) {
+        runSimulation();
+    } else {
+        setSimulationActive(false);
+    }
   };
 
   return (
@@ -110,61 +135,91 @@ const DigitalTwin = () => {
             </p>
           </div>
 
-           {/* Simulation Controls */}
-           <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex-1 flex flex-col gap-6">
-            <h3 className="font-bold text-lg text-slate-800 border-b border-slate-100 pb-4 flex items-center gap-2">
-               <Sun className="w-5 h-5 text-amber-500" />
-               Scenario Controls
-            </h3>
-            
-            <div className="space-y-6">
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm font-medium">
-                  <span className="text-slate-600">Global Temp Setpoint</span>
-                  <span className="text-green-600 font-mono font-bold bg-green-50 px-2 rounded">{temperature}°C</span>
-                </div>
-                <input 
-                  type="range" 
-                  min="18" 
-                  max="30" 
-                  value={temperature} 
-                  onChange={(e) => setTemperature(e.target.value)}
-                  className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-green-600"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm font-medium">
-                  <span className="text-slate-600">Occupancy Load</span>
-                  <span className="text-purple-600 font-mono font-bold bg-purple-50 px-2 rounded">{occupancy}%</span>
-                </div>
-                <input 
-                  type="range" 
-                  min="0" 
-                  max="100" 
-                  value={occupancy} 
-                  onChange={(e) => setOccupancy(e.target.value)}
-                  className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-purple-600"
-                />
-              </div>
-
-               <div className="p-4 rounded-xl bg-orange-50 border border-orange-100">
-                  <div className="flex items-start gap-3">
-                    <AlertTriangle className="w-5 h-5 text-orange-500 shrink-0 mt-0.5" />
-                    <div>
-                      <h4 className="text-sm font-bold text-slate-800">Impact Forecast</h4>
-                      <p className="text-xs text-slate-500 mt-1">
-                        Increasing temp by 2°C saves approx <span className="text-green-600 font-bold">12% Energy</span> but reduces comfort score by <span className="text-rose-500 font-bold">5%</span>.
-                      </p>
-                    </div>
-                  </div>
+            {/* Simulation Controls */}
+            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex-1 flex flex-col gap-6">
+             <h3 className="font-bold text-lg text-slate-800 border-b border-slate-100 pb-4 flex items-center gap-2">
+                <Sun className="w-5 h-5 text-amber-500" />
+                Scenario Controls
+             </h3>
+             
+             <div className="space-y-6">
+               <div className="space-y-2">
+                 <div className="flex justify-between text-sm font-medium">
+                   <span className="text-slate-600">Global Temp Setpoint</span>
+                   <span className="text-green-600 font-mono font-bold bg-green-50 px-2 rounded">{temperature}°C</span>
+                 </div>
+                 <input 
+                   type="range" 
+                   min="18" 
+                   max="30" 
+                   value={temperature} 
+                   onChange={(e) => setTemperature(e.target.value)}
+                   className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-green-600"
+                 />
                </div>
-            </div>
 
-            <button className="w-full py-3 bg-slate-900 text-white font-bold rounded-xl mt-auto hover:bg-slate-800 transition-colors shadow-lg shadow-slate-900/20">
-              Apply Changes
-            </button>
-           </div>
+               <div className="space-y-2">
+                 <div className="flex justify-between text-sm font-medium">
+                   <span className="text-slate-600">Occupancy Load</span>
+                   <span className="text-purple-600 font-mono font-bold bg-purple-50 px-2 rounded">{occupancy}%</span>
+                 </div>
+                 <input 
+                   type="range" 
+                   min="0" 
+                   max="100" 
+                   value={occupancy} 
+                   onChange={(e) => setOccupancy(e.target.value)}
+                   className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-purple-600"
+                 />
+               </div>
+
+              {results ? (
+                 <div className={`p-4 rounded-xl border ${results.optimization_analysis.is_optimized ? 'bg-green-50 border-green-100' : 'bg-orange-50 border-orange-100'}`}>
+                    <div className="flex items-start gap-3">
+                      {results.optimization_analysis.is_optimized ? (
+                          <Zap className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />
+                      ) : (
+                          <AlertTriangle className="w-5 h-5 text-orange-500 shrink-0 mt-0.5" />
+                      )}
+                      <div>
+                        <h4 className="text-sm font-bold text-slate-800">
+                            {results.optimization_analysis.is_optimized ? "System Optimized" : "Optimization Needed"}
+                        </h4>
+                        <p className="text-xs text-slate-500 mt-1">
+                          Probability: <span className="font-bold">{(results.optimization_analysis.probability * 100).toFixed(1)}%</span>
+                        </p>
+                        <div className="mt-2 text-xs grid grid-cols-2 gap-2">
+                            <div>
+                                <span className="block text-slate-400">Energy</span>
+                                <span className="font-bold text-slate-700">{results.simulated_metrics.energy_kwh} kWh</span>
+                            </div>
+                             <div>
+                                <span className="block text-slate-400">Water</span>
+                                <span className="font-bold text-slate-700">{results.simulated_metrics.water_liters} L</span>
+                            </div>
+                        </div>
+                      </div>
+                    </div>
+                 </div>
+              ) : (
+                 <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 text-center">
+                    <p className="text-sm text-slate-500">Adjust parameters and run simulation to see impact.</p>
+                 </div>
+              )}
+
+             </div>
+
+             <button 
+                onClick={runSimulation}
+                disabled={loading}
+                className={`w-full py-3 text-white font-bold rounded-xl mt-auto transition-colors shadow-lg shadow-slate-900/20 flex justify-center items-center gap-2
+                    ${loading ? 'bg-slate-700 cursor-not-allowed' : 'bg-slate-900 hover:bg-slate-800'}
+                `}
+             >
+               {loading ? <RefreshCw className="w-4 h-4 animate-spin"/> : <Play className="w-4 h-4" />}
+               {loading ? 'Simulating...' : 'Apply Changes'}
+             </button>
+            </div>
         </div>
 
       </div>

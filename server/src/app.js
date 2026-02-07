@@ -6,6 +6,7 @@ const dashboardRoutes = require('./routes/dashboard');
 const { router: authRoutes } = require('./routes/auth');
 const inquiryRoutes = require('./routes/inquiry');
 const notificationRoutes = require('./routes/notification');
+const digitalTwinRoutes = require('./routes/digitalTwin');
 
 dotenv.config();
 
@@ -23,6 +24,7 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/inquiries', inquiryRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/digital-twin', digitalTwinRoutes);
 
 app.get('/', (req, res) => {
   res.send('ASOS Backend Service: Status OK');
